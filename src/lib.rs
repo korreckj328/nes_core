@@ -30,9 +30,11 @@ pub struct CPU {
 }
 
 pub trait Mem {
-    fn mem_read(&mut self, addr: u16) -> u8;
+    fn mem_read(&mut self, addr: u16) -> u8 { self.memory[addr as usize] }
 
-    fn mem_write(&mut self, addr: u16, data: u8);
+    fn mem_write(&mut self, addr: u16, data: u8)  {
+        self.memory[addr as usize] = data;
+    }
 
     fn mem_read_u16(&mut self, pos: u16) -> u16 {
         let lo = self.mem_read(pos) as u16;
@@ -49,15 +51,6 @@ pub trait Mem {
     }
 }
 
-impl Mem for CPU {
-    fn mem_read(&mut self, addr: u16) -> u8 { self.memory[addr as usize] }
-
-    fn mem_write(&mut self, addr: u16, data: u8) {
-        self.memory[addr as usize] = data;
-    }
-
-
-}
 
 impl CPU {
     pub fn new() -> Self {

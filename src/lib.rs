@@ -36,11 +36,8 @@ trait Mem {
 
     fn mem_read_u16(&mut self, pos: u16) -> u16 {
         let lo = self.mem_read(pos) as u16;
-        println!("mem read u16, lo : {}", lo);
         let hi = self.mem_read(pos + 1) as u16;
-        println!("mem read u16, hi : {}", hi);
         let value = (hi << 8) | (lo as u16);
-        println!("return value : {}", value);
         value
     }
 
@@ -437,81 +434,28 @@ impl CPU {
     }
 
     pub fn load_and_run(&mut self, program: Vec<u8>) {
-        println!("program 1 {}", program[0]);
-        println!("program 2 {}", program[1]);
-        // println!("program 3 {}", program[2]);
         self.load(program);
-        let mut i = 0;
-        while i < self.memory.len() {
-            let x = self.mem_read(i as u16);
-            if x == 85 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0xA5 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0x10 {
-                print!("Memory {} : {} \n", i, x);
-            }
-            i += 1;
-        }
-        let result = self.mem_read(0xFFFC);
-        println!("result 2 : {}", result);
         self.reset();
-        let mut i = 0;
-        while i < self.memory.len() {
-            let x = self.mem_read(i as u16);
-            if x == 85 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0xA5 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0x10 {
-                print!("Memory {} : {} \n", i, x);
-            }
-            i += 1;
-        }
         self.run();
-        println!("done running");
     }
 
     pub fn reset(&mut self) {
-        let zero_value = 0b00000000;
         self.register_a = 0;
         self.register_x = 0;
         self.register_y = 0;
         self.stack_pointer = STACK_RESET;
         self.status = CpuFlags::from_bits_truncate(0b100100);
         self.program_counter = self.mem_read_u16(0xFFFC);
-        // println!("Program Counter: {}", self.program_counter);
-        // self.memory = [0; 0xFFFF];
     }
 
     pub fn load(&mut self, program: Vec<u8>) {
-        println!("program length {}", program.len());
-        println!("program 1 {}", program[0]);
-        println!("program 2 {}", program[1]);
-        // println!("program 3 {}", program[2]);
         self.memory[0x8000 .. (0x8000 + program.len())].copy_from_slice(&program[..]);
 
         self.mem_write_u16(0xFFFC, 0x8000);
-
-        let result = self.mem_read(0xFFFC);
-        let mut i = 0;
-        while i < self.memory.len() {
-            let x = self.mem_read(i as u16);
-            if x == 85 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0xA5 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0x10 {
-                print!("Memory {} : {} \n", i, x);
-            }
-            i += 1;
-        }
-        println!("result 1 : {}", result);
     }
 
     fn lda(&mut self, mode: &AddressingMode) {
         let addr = self.get_operand_address(&mode);
-        println!("{}", addr.to_string());
         let data = self.mem_read(addr);
         self.register_a = data;
         self.update_zero_and_negative_flags(self.register_a);
@@ -547,22 +491,6 @@ impl CPU {
     }
 
     pub fn run(&mut self) {
-        //TODO: Need to fill in opcodes
-
-        println!("in run");
-        let mut i = 0;
-        while i < self.memory.len() {
-            let x = self.mem_read(i as u16);
-            if x == 85 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0xA5 {
-                print!("Memory {} : {} \n", i, x);
-            } else if x == 0x10 {
-                print!("Memory {} : {} \n", i, x);
-            }
-            i += 1;
-        }
-
         let ref opcodes: HashMap<u8, &'static op_codes::OpCode> = *op_codes::OPCODES_MAP;
 
         loop {
@@ -572,8 +500,6 @@ impl CPU {
             let opcode = opcodes.get(&code)
                 .expect(&format!("Opcode {:x} is not recognized", code));
 
-            println!("in run about to run switch");
-            println!("opcode is: {}", code.to_string());
             match code {
                 //inx
                 0xe8 => {
@@ -585,12 +511,10 @@ impl CPU {
                 },
                 // lda (0xa9)
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => {
-                    println!("In run about to run lda");
                     self.lda(&opcode.mode)
                 }
                 // break
                 0x00 => {
-                    println!("about to use return");
                     return;
                 },
                 // sta
@@ -805,12 +729,9 @@ impl CPU {
                 _ => exit(-5)
             }
 
-            println!("after switch statement");
             if program_counter_state == self.program_counter {
-                println!("in pc state counter logic");
                 self.program_counter += (opcode.len - 1) as u16;
             }
-            println!("next is the loop top again");
         }
     }
 }

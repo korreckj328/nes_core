@@ -38,11 +38,7 @@ mod test {
     #[test]
     fn test_lda_from_memory() {
         let mut cpu = CPU::new();
-        let value : i8 = cpu.mem_read(0x10) as i8;
-        println!("{}", value.to_string());
         cpu.mem_write(0x10, 0x55);
-        let value : i8 = cpu.mem_read(0x10) as i8;
-        println!("{}", value.to_string());
         cpu.load_and_run(vec![0xA5, 0x10, 0x00]);
 
         assert_eq!(cpu.register_a, 0x55);

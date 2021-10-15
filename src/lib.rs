@@ -2,9 +2,10 @@
 // Jeremiah Korreck
 mod addressing_mode;
 mod op_codes;
-
+mod cpu_flags;
+use cpu_flags::CpuFlags;
 use std::collections::HashMap;
-use bitflags::bitflags;
+
 #[allow(unused_imports)]
 use addressing_mode::*;
 #[allow(unused_imports)]
@@ -12,30 +13,7 @@ use op_codes::*;
 
 use std::process::exit;
 
-bitflags! {
-    /// # Status Register (P) http://wiki.nesdev.com/w/index.php/Status_flags
-    ///
-    ///  7 6 5 4 3 2 1 0
-    ///  N V _ B D I Z C
-    ///  | |   | | | | +--- Carry Flag
-    ///  | |   | | | +----- Zero Flag
-    ///  | |   | | +------- Interrupt Disable
-    ///  | |   | +--------- Decimal Mode (not used on NES)
-    ///  | |   +----------- Break Command
-    ///  | +--------------- Overflow Flag
-    ///  +----------------- Negative Flag
-    ///
-    pub struct CpuFlags: u8 {
-        const CARRY             = 0b00000001;
-        const ZERO              = 0b00000010;
-        const INTERRUPT_DISABLE = 0b00000100;
-        const DECIMAL_MODE      = 0b00001000;
-        const BREAK             = 0b00010000;
-        const BREAK2            = 0b00100000;
-        const OVERFLOW          = 0b01000000;
-        const NEGATIV           = 0b10000000;
-    }
-}
+
 
 const STACK: u16 = 0x0100;
 const STACK_RESET: u8 = 0xFD;
@@ -411,7 +389,8 @@ impl CPU {
     }
 
     fn plp(&mut self) {
-        self.status.bits = self.stack_pop();
+        let value = self.stack_pop();
+        self.status.set_bits(value);
         self.status.remove(CpuFlags::BREAK);
         self.status.insert(CpuFlags::BREAK2);
     }
@@ -420,7 +399,7 @@ impl CPU {
         let mut flags = self.status.clone();
         flags.insert(CpuFlags::BREAK);
         flags.insert(CpuFlags::BREAK2);
-        self.stack_push(flags.bits);
+        self.stack_push(flags.get_bits());
     }
 
     fn bit(&mut self, mode: &AddressingMode) {
@@ -494,6 +473,7 @@ impl CPU {
     }
 
     pub fn reset(&mut self) {
+        let zero_value = 0b00000000;
         self.register_a = 0;
         self.register_x = 0;
         self.register_y = 0;
@@ -734,7 +714,8 @@ impl CPU {
                 },
                 // rti
                 0x40 => {
-                    self.status.bits = self.stack_pop();
+                    let value = self.stack_pop();
+                    self.status.set_bits(value);
                     self.status.remove(CpuFlags::BREAK);
                     self.status.insert(CpuFlags::BREAK2);
                     self.program_counter = self.stack_pop_u16();

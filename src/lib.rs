@@ -29,10 +29,10 @@ pub struct CPU {
     memory: [u8; 0xFFFF]
 }
 
-pub trait Mem {
-    fn mem_read(&mut self, addr: u16) -> u8 { self.memory[addr as usize] }
+impl CPU {
+    pub fn mem_read(&mut self, addr: u16) -> u8 { self.memory[addr as usize] }
 
-    fn mem_write(&mut self, addr: u16, data: u8)  {
+    pub fn mem_write(&mut self, addr: u16, data: u8)  {
         self.memory[addr as usize] = data;
     }
 

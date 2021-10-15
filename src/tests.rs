@@ -1,7 +1,7 @@
 
 #[cfg(test)]
 mod test {
-    use crate::{CPU, Mem};
+    use crate::{CPU};
 
     #[test]
     fn test_0xa9_lda_immidiate_load_data() {

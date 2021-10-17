@@ -29,7 +29,7 @@ pub struct CPU {
     memory: [u8; 0xFFFF]
 }
 
-trait Mem {
+pub trait Mem {
     fn mem_read(&mut self, addr: u16) -> u8;
 
     fn mem_write(&mut self, addr: u16, data: u8);
@@ -60,6 +60,15 @@ impl Mem for CPU {
 }
 
 impl CPU {
+    pub fn my_mem_read(&mut self, addr: u16) -> u8 {
+        let value = self.mem_read(addr);
+        value
+    }
+
+    pub fn my_mem_write(&mut self, addr: u16, data: u8) {
+        self.mem_write(addr, data);
+    }
+
     pub fn new() -> Self {
         CPU {
             register_a: 0,
@@ -743,5 +752,3 @@ impl CPU {
         }
     }
 }
-
-mod tests;

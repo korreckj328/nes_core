@@ -462,6 +462,9 @@ impl CPU {
 
         self.mem_write_u16(0xFFFC, 0x0600);
 
+    }
+
+    pub fn print_memory(&mut self) {
         let mut i = 0;
         for mem in self.memory {
             if mem != 0x00 {

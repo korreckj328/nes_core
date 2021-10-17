@@ -461,6 +461,11 @@ impl CPU {
         self.memory[0x8000 .. (0x8000 + program.len())].copy_from_slice(&program[..]);
 
         self.mem_write_u16(0xFFFC, 0x8000);
+
+        let i = 0;
+        for mem in self.memory {
+            println!("Memory {} : {}", i, mem);
+        }
     }
 
     fn lda(&mut self, mode: &AddressingMode) {
